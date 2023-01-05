@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+{% load cache%}
+{% block header %}
+    {% if is_edit %}
+        Редактирование поста
+    {% else %}
+        Создание нового поста
+    {% endif %}
+{% endblock %}
+{% block content %}
+  {% cache 20 sidebar %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 p-5">
+        <div class="card">
+          <div class="card-header">       
+            {% if is_edit %}
+              Редактироват пост
+            {% else %}
+              Создать пост
+            {% endif %}             
+          </div>
+          <div class="card-body">
+            {% if is_edit %}
+        <form action="{% url 'posts:post_edit' post.id %}" method="post" enctype="multipart/form-data">
+            {% else %}        
+            <form method="post" action="{% url 'posts:profile' request.user.username %}">
+            {% endif %}
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}            
+            {% for field in form %}
+             <div class="form-group row" aria-required={% if field.field.required %}"true"{% else %}"false"{% endif %}>
+             <label for="{{ field.id_for_label }}" class="col-md-3 col-form-label text-md-right">
+                 {{ field.label }}{% if field.field.required %}<span class="required">*</span>{% endif %}</label>
+             <div class="col-md-3">
+                 {{ field }}
+                 {% if field.help_text %}
+                     <small id="{{ field.id_for_label }}-help"
+                      class="form-text text-muted">{{ field.help_text|safe }}
+                    </small>
+                 {% endif %}
+             </div>
+             </div>
+            {% endfor %}
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="save btn btn-default">
+                  {% if is_edit %}
+                      Сохранить
+                  {% else %}
+                      Создать пост
+                  {% endif %}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endcache %}
+{% endblock %}
