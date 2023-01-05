@@ -258,10 +258,10 @@ class FollowTests(TestCase):
         Follow.objects.get_or_create(author=self.author,
                                      user=self.following_user)
         response = self.following_user_client.get(
-                       reverse('posts:follow_index'))
+            reverse('posts:follow_index'))
         posts = response.context['page_obj']
         self.assertEqual(len(posts), 1)
         response = self.not_following_user_client.get(
-                       reverse('posts:follow_index'))
+            reverse('posts:follow_index'))
         posts = response.context['page_obj']
         self.assertEqual(len(posts), 0)
