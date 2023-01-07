@@ -9,7 +9,7 @@ from .utils import paginator_arrange
 
 @cache_page(20)
 def index(request):
-    post_list = Post.objects.all().order_by('-pub_date')
+    post_list = Post.objects.all()
     page_obj = paginator_arrange(request, post_list)
     context = {
         'page_obj': page_obj,
@@ -19,7 +19,7 @@ def index(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    post_list = Post.objects.filter(group=group).order_by('-pub_date')
+    post_list = Post.objects.filter(group=group)
     page_obj = paginator_arrange(request, post_list)
     context = {
         'group': group,
@@ -33,11 +33,11 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
     page_obj = paginator_arrange(request, post_list)
-    following = False
     if request.user.is_authenticated:
-        if (Follow.objects.filter(user=request.user,
-                                  author=author).exists()):
-            following = True
+        following = Follow.objects.filter(user=request.user,
+                                          author=author).exists()
+    else:
+        following = False
     context = {'author': author,
                'page_obj': page_obj,
                'following': following,
@@ -111,12 +111,8 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    follows = Follow.objects.filter(user=request.user)
-    post_list = []
-    for i in follows:
-        posts = Post.objects.filter(author=i.author)
-        for f in posts:
-            post_list.append(f)
+    post_list = Post.objects.filter(
+        author__following__user=request.user,).all()
     page_obj = paginator_arrange(request, post_list)
     context = {'page_obj': page_obj}
     return render(request, 'posts/follow.html', context)
@@ -125,9 +121,9 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    if not (Follow.objects.filter(user=request.user,
-                                  author=author).exists()) \
-       and author != request.user:
+    if (not (Follow.objects.filter(user=request.user,
+                                   author=author).exists()) and
+       author != request.user):
         Follow.objects.create(user=request.user, author=author)
     context = {
         'username': username
@@ -138,8 +134,9 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    if author:
-        Follow.objects.get(user=request.user, author=author).delete()
+    if type(author) == User:
+        if Follow.objects.get(user=request.user, author=author):
+            Follow.objects.get(user=request.user, author=author).delete()
     context = {
         'username': username
     }
