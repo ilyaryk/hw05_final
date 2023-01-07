@@ -207,7 +207,7 @@ class PostsPagesTests(TestCase):
         """Проверка кеша."""
         response = self.client.get(reverse("posts:index"))
         response_1 = response.content
-        Post.objects.get(id=self.post.id).delete()
+        self.post.delete()
         response2 = self.client.get(reverse("posts:index"))
         response_2 = response2.content
         self.assertEqual(response_1, response_2)
@@ -238,6 +238,7 @@ class FollowTests(TestCase):
         self.author_client.force_login(self.author)
 
     def test_follow(self):
+        '''Тест подписки'''
         self.following_user_client.get(
             reverse('posts:profile_follow',
                     kwargs={'username': self.author.username}))
@@ -246,8 +247,14 @@ class FollowTests(TestCase):
         self.following_user_client.get(
             reverse('posts:profile_follow',
                     kwargs={'username': self.author.username}))
-        self.assertEqual(len(Follow.objects.filter(user=self.following_user,
-                                                   author=self.author)), 1)
+        self.assertEqual(Follow.objects.filter(user=self.following_user,
+                                               author=self.author).count(), 1)
+
+    def test_unfollow(self):
+        '''Тест отписки'''
+        self.following_user_client.get(
+            reverse('posts:profile_follow',
+                    kwargs={'username': self.author.username}))
         self.following_user_client.get(
             reverse('posts:profile_unfollow',
                     kwargs={'username': self.author.username}))
@@ -259,9 +266,9 @@ class FollowTests(TestCase):
                                      user=self.following_user)
         response = self.following_user_client.get(
             reverse('posts:follow_index'))
-        posts = response.context['page_obj']
-        self.assertEqual(len(posts), 1)
+        posts = response.context['page_obj'].count()
+        self.assertEqual(posts, 1)
         response = self.not_following_user_client.get(
             reverse('posts:follow_index'))
-        posts = response.context['page_obj']
-        self.assertEqual(len(posts), 0)
+        posts = response.context['page_obj'].count()
+        self.assertEqual(posts, 0)

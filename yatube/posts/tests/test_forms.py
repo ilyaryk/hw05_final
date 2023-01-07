@@ -78,7 +78,7 @@ class FormsTests(TestCase):
             Post.objects.filter(
                 group=self.group,
                 text=form_data['text'],
-                image='posts/test.gif',
+                image=uploaded.name,
             ).exists()
         )
 
