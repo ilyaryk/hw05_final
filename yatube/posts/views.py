@@ -124,7 +124,7 @@ def profile_follow(request, username):
     if (not (Follow.objects.filter(user=request.user,
                                    author=author).exists())
        and author != request.user):
-        Follow.objects.create(user=request.user, author=author)
+        Follow.objects.get_or_create(user=request.user, author=author)
     context = {
         'username': username
     }

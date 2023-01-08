@@ -74,6 +74,7 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
+    models.UniqueConstraint(fields=['user', 'author'], name='unique_follow')
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
