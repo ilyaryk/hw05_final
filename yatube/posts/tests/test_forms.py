@@ -54,8 +54,9 @@ class FormsTests(TestCase):
             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
             b'\x0A\x00\x3B')
+        image_name = 'posts/test.gif'
         uploaded = SimpleUploadedFile(
-            name='posts/test.gif',
+            name=image_name,
             content=small_gif,
             content_type='image/jpg'
         )
@@ -78,7 +79,7 @@ class FormsTests(TestCase):
             Post.objects.filter(
                 group=self.group,
                 text=form_data['text'],
-                image=uploaded.name,
+                image=image_name,
             ).exists()
         )
 

@@ -266,9 +266,9 @@ class FollowTests(TestCase):
                                      user=self.following_user)
         response = self.following_user_client.get(
             reverse('posts:follow_index'))
-        posts = response.context['page_obj'].count()
+        posts = len(response.context['page_obj'])
         self.assertEqual(posts, 1)
         response = self.not_following_user_client.get(
             reverse('posts:follow_index'))
-        posts = response.context['page_obj'].count()
+        posts = len(response.context['page_obj'])
         self.assertEqual(posts, 0)
